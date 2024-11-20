@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
@@ -7,15 +7,32 @@ import { fetchProducts } from '../redux/slices/productSlice'
 
 const Home = () => {
   const dispatch = useDispatch()
-
   const {allProducts,loading,errorMsg} = useSelector(state=>state.productReducer)
   console.log(allProducts,loading,errorMsg);
+
+  const [currentPage,setCurrentPage] = useState(1)
+  const productPerPage = 8
+  const totalPages = Math.ceil(allProducts?.length/productPerPage)
+  const currentPageProductLastIndex = currentPage * productPerPage
+  const currentPageProductFirstIndex = currentPageProductLastIndex - productPerPage
+  const visibleAllProduct = allProducts?.slice(currentPageProductFirstIndex,currentPageProductLastIndex)
   
 
   useEffect(()=>{
     dispatch(fetchProducts())
   },[])
 
+  const navigateToNextPage = ()=>{
+    if (currentPage!=totalPages) {
+      setCurrentPage(currentPage+1)
+    }
+  }
+
+  const navigateToPrevPage = ()=>{
+    if (currentPage!=1) {
+      setCurrentPage(currentPage-1)
+    }
+  }
 
   return (
     <>
@@ -32,7 +49,7 @@ const Home = () => {
           <div className='grid grid-cols-4 gap-4'>
               {
                 allProducts?.length>0 ?
-                allProducts?.map(product=>(
+                visibleAllProduct?.map(product=>(
                   <div key={product?.id} className='rounded border p-2 shadow'>
                     <img width={'100%'} height={"100px"} src={product?.thumbnail} alt="" />
                     <div className='text-center'>
@@ -46,6 +63,11 @@ const Home = () => {
                 Product not found!
               </div>
               }
+          </div>
+          <div className="text-2xl text-center font-bold mt-20">
+            <span onClick={navigateToPrevPage} className="cursor-pointer"><i className="fa-solid fa-backward me-5"></i></span>
+            <span>{currentPage} of {totalPages}</span>
+            <span onClick={navigateToNextPage} className="cursor-pointer"><i className="fa-solid fa-forward me-5"></i></span>
           </div>
         </>
         }

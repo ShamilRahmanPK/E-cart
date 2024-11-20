@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import { useParams } from 'react-router-dom'
-import { all } from 'axios'
 import { useDispatch, useSelector } from 'react-redux'
 import { addToWhishlist } from '../redux/slices/wishlistSlice'
+import { addToCart } from '../redux/slices/cartSlice'
 
 const View = () => {
-
+  const userCart = useSelector(state=>state.cartReducer)
   const dispatch = useDispatch()
   const userWhishlist = useSelector(state=>state.wishlistReduer)
   const [products,setProducts] = useState({})
@@ -31,6 +31,16 @@ const View = () => {
       dispatch(addToWhishlist(products))
     }
   }
+
+  const handleCart = ()=>{
+    dispatch(addToCart(products))
+    const existingProduct = userCart?.find(item=>item?.id==id)
+    if (existingProduct) {
+      alert("Product quantity is incremending in your cart!")
+    } else {
+      alert("Product added to your cart")
+    }
+  }
   
 
   return (
@@ -42,7 +52,7 @@ const View = () => {
           <img className='ms-30' width={'350px'} height={'250px'} src={products?.thumbnail} alt="" />
           <div className="flex justify-between m-5">
               <button onClick={handleWhishlist} className="bg-blue-600 rounded text-white p-2">ADD TO WISHLIST</button>
-              <button className="bg-green-600 rounded text-white p-2">ADD TO Cart</button>
+              <button onClick={handleCart} className="bg-green-600 rounded text-white p-2">ADD TO Cart</button>
             </div>
           </div>
           <div>
@@ -57,7 +67,7 @@ const View = () => {
             {
               products?.reviews?.length>0?
               products?.reviews?.map(item=>(
-                <div className="shadow border rounded p-2 mb-2">
+                <div key={item?.id} className="shadow border rounded p-2 mb-2">
                   <h5>
                     <span className="font-bold">{item?.reviewerName}</span> : <span>{item?.comment}</span>
                   </h5>
